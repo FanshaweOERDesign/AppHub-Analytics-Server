@@ -44,6 +44,8 @@ function sendTrackingPixel(res) {
     res.setHeader('Content-Type', 'image/gif');
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.end(gifBuffer);
 }
 
@@ -63,13 +65,13 @@ app.get('/track-unique.gif', validateReferer, (req, res) => {
     };
     dbrtns.trackVisitUnique(visit)
         .then(result => {
-            res.status(200).json({ message: 'Visit tracked successfully', result });
+            // Send a 1x1 transparent GIF as the response
+            sendTrackingPixel(res);
         })
         .catch(error => {
             res.status(500).json({ message: 'Error tracking visit', error });
         });
-    // Send a 1x1 transparent GIF as the response
-    sendTrackingPixel(res);
+    
 
     }
 );
@@ -97,14 +99,13 @@ app.get('/track.gif', validateReferer, (req, res) => {
     };
     dbrtns.trackVisit(visit)
         .then(result => {
-            res.status(200).json({ message: 'Visit tracked successfully', result });
+            // Send a 1x1 transparent GIF as the response
+            sendTrackingPixel(res);
+
         })
         .catch(error => {
             res.status(500).json({ message: 'Error tracking visit', error });
         });
-    // Send a 1x1 transparent GIF as the response
-    sendTrackingPixel(res);
-
     }
 );
 
