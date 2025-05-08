@@ -1,7 +1,7 @@
 // mongoClient.mjs
 import { MongoClient, ObjectId } from 'mongodb';
 
-const uri = process.env.MONGO_URI;
+const uri = process.env.DB_URI;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true
