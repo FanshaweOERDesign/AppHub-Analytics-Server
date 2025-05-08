@@ -35,7 +35,7 @@ export async function findMany(collectionName, query = {}, options = {}) {
 
 export async function updateOne(collectionName, filter, update, options = {}) {
   const collection = db.collection(collectionName);
-  return await collection.updateOne(filter, { $set: update }, options);
+  return await collection.updateOne(filter, update, options);
 }
 
 export async function deleteOne(collectionName, filter) {
