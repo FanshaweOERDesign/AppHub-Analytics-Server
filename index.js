@@ -22,7 +22,7 @@ app.use((req, res, next) => {
   });
 
   const allowedDomains = [
-    'https://FanshaweOERDesign.github.io',
+    'https://fanshaweoerdesign.github.io',
     self,
   ];
 
