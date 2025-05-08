@@ -1,0 +1,12 @@
+{
+  "name": "app-hub-analytics-server",
+  "version": "1.0.0",
+  "description": "Server for tracking usage of Fanshawe OER Design Studio AppHub apps",
+  "license": "MIT",
+  "author": "Jason Benoit",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
