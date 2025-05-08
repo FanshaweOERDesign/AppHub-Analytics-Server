@@ -8,8 +8,7 @@ async function trackVisit(visit){
         const result = await db.findOne('visits', { appId: visit.appId, userIp: visit.userIp });
         if (result) {
             // Update the existing visit
-            console.log('Visit already exists, updating visit count...');
-            await db.updateOne('visits', { appId: visit.appId, userId: visit.userIp }, { numVisits: result.numVisits + 1 });
+            await db.updateOne('visits', { appId: visit.appId, userIp: visit.userIp }, { $inc: { numVisits: 1 } });
 
         } else {
             // Insert a new visit
