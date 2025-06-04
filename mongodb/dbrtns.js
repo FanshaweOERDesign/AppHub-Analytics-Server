@@ -41,6 +41,29 @@ async function getVisitTotals() {
     }
 }
 
+async function getVisitorCounts() {
+    const visitorCounts = {};
+    try {
+        const dbConn = await db.connect('AppHubTracker');
+        const result = await db.findMany('visits', {});
+        for (const visit of result) {
+            const appId = visit.appId;
+            if (!visitorCounts[appId]) {
+                visitorCounts[appId] = new Set();
+            }
+            visitorCounts[appId].add(visit.userIp);
+        }
+        // Convert sets to counts
+        for (const appId in visitorCounts) {
+            visitorCounts[appId] = visitorCounts[appId].size;
+        }
+        return visitorCounts;
+    } catch (error) {
+        console.error('Error getting unique visitor counts:', error);
+        throw error;
+    }
+}
+
 async function trackVisitUnique(visit) {
     try {
         const result = await db.insertOne('uniqueVisits', visit);
@@ -61,5 +84,5 @@ async function getUniqueVisits() {
     }
 }
 
-export {trackVisit, getVisitTotals, trackVisitUnique, getUniqueVisits};
+export {trackVisit, getVisitTotals, getVisitorCounts, trackVisitUnique, getUniqueVisits};
 

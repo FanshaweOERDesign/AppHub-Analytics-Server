@@ -120,6 +120,17 @@ app.get('/totals', (req, res) => {
     }
 );
 
+app.get('/visitors', (req, res) => {
+    dbrtns.getVisitorCounts()
+        .then(result => {
+            console.log('Visitor counts:', result);
+            res.status(200).json({ message: 'Visitor counts retrieved successfully', result });
+        })
+        .catch(error => {
+            res.status(500).json({ message: 'Error retrieving visitor counts', error });
+        });
+});
+
 app.listen(process.env.PORT || 3000, () => {
   console.log(`Server is running on port ${process.env.PORT || 3000}`);
 });
