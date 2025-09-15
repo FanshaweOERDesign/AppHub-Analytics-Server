@@ -60,7 +60,7 @@ async function getGeolocation(ipArray) {
         let results = [];
         while (count < ipArray.length) {
             const batch = ipArray.slice(count, count + 100);
-            const response = await queue.add(() => axios.post('http://ip-api.com/batch', batch.map(ip => ({ query: ip, fields: 'city,country' })), { headers: { 'Content-Type': 'application/json' } }));
+            const response = await queue.add(() => axios.post('http://ip-api.com/batch', batch.map(ip => ({ query: ip, fields: 'city,country,lat,lon' })), { headers: { 'Content-Type': 'application/json' } }));
             results = results.concat(response.data);
             count += 100;
         }
