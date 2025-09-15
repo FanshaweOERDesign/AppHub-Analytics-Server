@@ -7,7 +7,7 @@ import PQueue from 'p-queue';
 import axios from 'axios';
 import { get } from 'http';
 
-const queue = new PQueue({ interval: 1000, intervalCap: 2 }); // 2 requests per second
+const queue = new PQueue({ interval: 60 * 1000, intervalCap: 15 }); // 15 requests per minute
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,7 +60,7 @@ async function getGeolocation(ipArray) {
         let results = [];
         while (count < ipArray.length) {
             const batch = ipArray.slice(count, count + 100);
-            const response = await queue.add(() => axios.post('https://ip-api.com/batch', batch.map(ip => ({ query: ip, fields: 'city,country' })), { headers: { 'Content-Type': 'application/json' } }));
+            const response = await queue.add(() => axios.post('http://ip-api.com/batch', batch.map(ip => ({ query: ip, fields: 'city,country' })), { headers: { 'Content-Type': 'application/json' } }));
             results = results.concat(response.data);
             count += 100;
         }
