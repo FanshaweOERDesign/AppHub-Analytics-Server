@@ -84,5 +84,15 @@ async function getUniqueVisits() {
     }
 }
 
-export {trackVisit, getVisitTotals, getVisitorCounts, trackVisitUnique, getUniqueVisits};
+async function getIpAddresses() {
+    try {
+        const result = await db.findMany('visits', {}, { projection: { userIp: 1, _id: 0 } });
+        return result.map(entry => entry.userIp);
+    } catch (error) {
+        console.error('Error getting IP addresses:', error);
+        throw error;
+    }
+}
+
+export {trackVisit, getVisitTotals, getVisitorCounts, trackVisitUnique, getUniqueVisits, getIpAddresses};
 

@@ -3,6 +3,11 @@ import cors from 'cors';
 import * as dbrtns from './mongodb/dbrtns.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import PQueue from 'p-queue';
+import axios from 'axios';
+import { get } from 'http';
+
+const queue = new PQueue({ interval: 1000, intervalCap: 2 }); // 2 requests per second
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,22 +24,22 @@ app.use((req, res, next) => {
     req.userAgent = req.headers['user-agent'];
     req.referrer = req.headers['referer'] || req.headers['referrer'];
     next();
-  });
+});
 
-  const allowedDomains = [
+const allowedDomains = [
     'https://fanshaweoerdesign.github.io',
     self,
-  ];
+];
 
-  // Middleware to validate the referer header
-  function validateReferer(req, res, next) {
+// Middleware to validate the referer header
+function validateReferer(req, res, next) {
     const isValid = allowedDomains.some(domain => req.referrer.startsWith(domain));
     if (!isValid) {
         console.warn(`Blocked tracking pixel request from invalid referer: ${referer}`);
         return res.status(403).end(); // Forbidden
     }
     next();
-  }
+}
 
 function sendTrackingPixel(res) {
     const gifBuffer = Buffer.from(
@@ -49,7 +54,24 @@ function sendTrackingPixel(res) {
     res.end(gifBuffer);
 }
 
-app.get('/', (req, res)=> {
+async function getGeolocation(ipArray) {
+    try {
+        let count = 0;
+        let results = [];
+        while (count < ipArray.length) {
+            const batch = ipArray.slice(count, count + 100);
+            const response = await queue.add(() => axios.post('https://ip-api.com/batch', batch.map(ip => ({ query: ip, fields: 'city,country' })), { headers: { 'Content-Type': 'application/json' } }));
+            results = results.concat(response.data);
+            count += 100;
+        }
+        return results;
+    } catch (error) {
+        console.error('Error getting geolocation:', error);
+        throw error;
+    }
+}
+
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
@@ -71,9 +93,9 @@ app.get('/track-unique.gif', validateReferer, (req, res) => {
         .catch(error => {
             res.status(500).json({ message: 'Error tracking visit', error });
         });
-    
 
-    }
+
+}
 );
 
 // Get unique visits with timestamp
@@ -85,12 +107,12 @@ app.get('/unique-visits', (req, res) => {
         .catch(error => {
             res.status(500).json({ message: 'Error retrieving unique visits', error });
         });
-    }
+}
 );
 
 // Track simple number of visits, visitors
 app.get('/track.gif', validateReferer, (req, res) => {
-    
+
     const visit = {
         appId: req.query.appId,
         userIp: req.clientIp,
@@ -106,7 +128,7 @@ app.get('/track.gif', validateReferer, (req, res) => {
         .catch(error => {
             res.status(500).json({ message: 'Error tracking visit', error });
         });
-    }
+}
 );
 
 app.get('/totals', (req, res) => {
@@ -117,7 +139,7 @@ app.get('/totals', (req, res) => {
         .catch(error => {
             res.status(500).json({ message: 'Error retrieving visit totals', error });
         });
-    }
+}
 );
 
 app.get('/visitors', (req, res) => {
@@ -131,8 +153,14 @@ app.get('/visitors', (req, res) => {
         });
 });
 
+app.get('/ip-locations', async (req, res) => {
+    const ipArray = await dbrtns.getIpAddresses();
+    const geolocationData = await getGeolocation(ipArray);
+    res.status(200).json({ message: 'IP locations retrieved successfully', result: geolocationData });
+});
+
 app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server is running on port ${process.env.PORT || 3000}`);
+    console.log(`Server is running on port ${process.env.PORT || 3000}`);
 });
 
 
