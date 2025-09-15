@@ -84,7 +84,7 @@ async function getUniqueVisits() {
     }
 }
 
-async function getIpAddresses() {
+async function getAllIpAddresses() {
     try {
         const result = await db.findMany('visits', {}, { projection: { userIp: 1, _id: 0 } });
         return result.map(entry => entry.userIp);
@@ -94,5 +94,16 @@ async function getIpAddresses() {
     }
 }
 
-export {trackVisit, getVisitTotals, getVisitorCounts, trackVisitUnique, getUniqueVisits, getIpAddresses};
+async function getDistinctIpAddresses() {
+    try {
+        const result = await db.findMany('visits', {}, { projection: { userIp: 1, _id: 0 } });
+        const ipSet = new Set(result.map(entry => entry.userIp));
+        return Array.from(ipSet);
+    } catch (error) {
+        console.error('Error getting IP addresses:', error);
+        throw error;
+    }
+}
+
+export {trackVisit, getVisitTotals, getVisitorCounts, trackVisitUnique, getUniqueVisits, getAllIpAddresses, getDistinctIpAddresses};
 

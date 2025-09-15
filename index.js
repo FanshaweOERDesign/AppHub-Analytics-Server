@@ -154,7 +154,7 @@ app.get('/visitors', (req, res) => {
 });
 
 app.get('/ip-locations', async (req, res) => {
-    const ipArray = await dbrtns.getIpAddresses();
+    const ipArray = await dbrtns.getDistinctIpAddresses();
     const geolocationData = await getGeolocation(ipArray);
     res.status(200).json({ message: 'IP locations retrieved successfully', result: geolocationData });
 });
